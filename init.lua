@@ -39,9 +39,9 @@ require 'mini.ai'.setup()
 
 require 'mini.comment'.setup {
   mappings = {
-    comment_line = '_',
-    comment_visual = '_',
-    textobject = '_',
+    comment_line = '-',
+    comment_visual = '-',
+    textobject = '-',
   }
 }
 
@@ -110,7 +110,7 @@ require 'mini.diff'.setup()
 
 require 'mini.files'.setup {
   mappings = {
-    close = '<bs>',
+    close = '<c-1>',
     reset = '0',
   }
 }
@@ -156,17 +156,17 @@ require 'leap'.setup {
 
 require 'mason'.setup()
 
-vim.lsp.config('ideals', {
-  cmd = { "/bin/python3", "/home/yqloss/lsp.py", "--host", "127.0.0.1", "--port", "8989" },
-  filetypes = { 'rs', 'kotlin', 'java', 'gradle', 'javascript', 'typescript', 'vue' },
-  root_markers = {
-    'pom.xml',
-    'build.gradle',
-    'build.gradle.kts',
-    'package.json',
-    'Cargo.toml',
-  }
-})
+-- vim.lsp.config('ideals', {
+--   cmd = { "/bin/python3", "/home/yqloss/lsp.py", "--host", "127.0.0.1", "--port", "8989" },
+--   filetypes = { 'rs', 'kotlin', 'java', 'gradle', 'javascript', 'typescript', 'vue' },
+--   root_markers = {
+--     'pom.xml',
+--     'build.gradle',
+--     'build.gradle.kts',
+--     'package.json',
+--     'Cargo.toml',
+--   }
+-- })
 
 vim.lsp.config('lua_ls', {
   settings = {
@@ -186,7 +186,7 @@ vim.lsp.config('lua_ls', {
 })
 
 vim.lsp.enable {
-  'ideals',
+  -- 'ideals',
   'lua_ls',
   'pyright',
   'clangd',
@@ -287,10 +287,9 @@ n('U', '<C-r>')
 n('K', vim.diagnostic.open_float)
 n('Z', '<nop>')
 
-n('+', '"yyymy"yP`y')
-x('+', '"yy"yPgv')
+n('=', '"yyymy"yP`y')
+x('=', '"yy"yPgv')
 
-n('<bs>', require 'mini.files'.open)
 n('\\', '<cmd>Pick files<cr>')
 n('<cr>', '<cmd>Pick buffers<cr>')
 
@@ -311,8 +310,6 @@ n('<c-a>', 'ggVG')
 n('<c-c>', 'myggVG"+y`y')
 x('<c-c>', '"+y')
 
-nx('-', '"0')
-nx('=', '"+')
 nx('gf', '=')
 n('gF', 'myggVG=`y')
 n('gff', '==')
@@ -320,6 +317,9 @@ n('gff', '==')
 nxo('H', '^')
 nxo('L', '$')
 nxo('R', '%')
+
+nxo('+', '"+')
+nxo('_', '"0')
 
 all('<c-s>', '<cmd>w!<cr>')
 all('<c-q>', '<cmd>x!<cr>')
@@ -333,6 +333,7 @@ all('<a-h>', '<cmd>vertical resize -2<cr>')
 all('<a-l>', '<cmd>vertical resize +2<cr>')
 all('<c-cr>', '<cmd>wincmd =<cr>')
 all('<c-space>', '<cmd>resize<cr><cmd>vertical resize<cr>')
+all('<c-1>', require 'mini.files'.open)
 
 n('<leader>f', vim.lsp.buf.format)
 n('<leader>z', 'zz')
