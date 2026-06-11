@@ -29,7 +29,7 @@ vim.pack.add {
   'https://codeberg.org/andyg/leap.nvim',
   'https://github.com/mason-org/mason.nvim',
   'https://github.com/neovim/nvim-lspconfig',
-  'http://github.com/mbbill/undotree',
+  'https://github.com/mbbill/undotree',
   'https://github.com/akinsho/toggleterm.nvim',
 }
 
@@ -72,9 +72,9 @@ require 'mini.pairs'.setup()
 require 'mini.snippets'.setup {
   snippets = snippets,
   mappings = {
-    expand = 'S',
-    jump_prev = 'H',
-    jump_next = 'L',
+    expand = '<c-cr>',
+    jump_prev = '<c-[>',
+    jump_next = '<c-]>',
     stop = '<c-c>',
   }
 }
@@ -107,7 +107,14 @@ require 'mini.basics'.setup {
 
 require 'mini.bracketed'.setup()
 require 'mini.diff'.setup()
-require 'mini.files'.setup()
+
+require 'mini.files'.setup {
+  mappings = {
+    close = '<bs>',
+    reset = '0',
+  }
+}
+
 require 'mini.jump'.setup()
 require 'mini.pick'.setup()
 require 'mini.cursorword'.setup()
@@ -149,11 +156,19 @@ require 'leap'.setup {
 
 require 'mason'.setup()
 
-vim.lsp.enable {
-  "lua_ls",
-}
+vim.lsp.config('ideals', {
+  cmd = { "/bin/python3", "/home/yqloss/lsp.py", "--host", "127.0.0.1", "--port", "8989" },
+  filetypes = { 'rs', 'kotlin', 'java', 'gradle', 'javascript', 'typescript', 'vue' },
+  root_markers = {
+    'pom.xml',
+    'build.gradle',
+    'build.gradle.kts',
+    'package.json',
+    'Cargo.toml',
+  }
+})
 
-vim.lsp.config("lua_ls", {
+vim.lsp.config('lua_ls', {
   settings = {
     Lua = {
       runtime = {
@@ -169,6 +184,17 @@ vim.lsp.config("lua_ls", {
     }
   }
 })
+
+vim.lsp.enable {
+  'ideals',
+  'lua_ls',
+  'pyright',
+  'clangd',
+  'gopls',
+  'bashls',
+  'taplo',
+  'yamlls',
+}
 
 vim.cmd.colorscheme 'catppuccin-mocha'
 
@@ -207,6 +233,7 @@ vim.opt.fileformat = 'unix'
 vim.opt.fileformats = 'unix,dos'
 vim.opt.encoding = 'utf-8'
 vim.opt.fileencoding = 'utf-8'
+vim.opt.completeopt = { 'menuone', 'noinsert', 'noselect', 'popup', 'fuzzy' }
 vim.g.mapleader = 'z'
 
 vim.api.nvim_create_autocmd('BufWritePre', {
@@ -232,7 +259,7 @@ c('<esc>', '<c-c>')
 n(' ', '<Plug>(leap-anywhere)')
 xo(' ', '<Plug>(leap)')
 
-n('1', '<nop>')
+n('1', vim.lsp.buf.hover)
 n('2', '@')
 n('3', vim.lsp.buf.rename)
 n('4', '<nop>')
@@ -257,22 +284,22 @@ n(')', '0')
 n('Q', '@q')
 n('M', '`m')
 n('U', '<C-r>')
-n('K', vim.lsp.buf.hover)
+n('K', vim.diagnostic.open_float)
 n('Z', '<nop>')
 
 n('+', '"yyymy"yP`y')
 x('+', '"yy"yPgv')
 
-n('<bs>', '<cmd>Pick grep<cr>')
+n('<bs>', require 'mini.files'.open)
 n('\\', '<cmd>Pick files<cr>')
 n('<cr>', '<cmd>Pick buffers<cr>')
 
 local error = { severity = vim.diagnostic.severity.ERROR }
 local function jump_error(dir) require 'mini.bracketed'.diagnostic(dir, error) end
-n('[E', function() jump_error('first', error) end)
-n(']E', function() jump_error('last', error) end)
-n('[e', function() jump_error('forward', error) end)
-n(']e', function() jump_error('backward', error) end)
+n('[E', function() jump_error('first') end)
+n(']E', function() jump_error('last') end)
+n('[e', function() jump_error('forward') end)
+n(']e', function() jump_error('backward') end)
 
 n('gd', vim.lsp.buf.definition)
 n('gD', vim.lsp.buf.declaration)
@@ -287,6 +314,7 @@ x('<c-c>', '"+y')
 nx('-', '"0')
 nx('=', '"+')
 nx('gf', '=')
+n('gF', 'myggVG=`y')
 n('gff', '==')
 
 nxo('H', '^')
@@ -297,7 +325,7 @@ all('<c-s>', '<cmd>w!<cr>')
 all('<c-q>', '<cmd>x!<cr>')
 all('<c-s-q>', '<cmd>wa!<cr><cmd>tabo<cr>')
 all('<c-s-u>', '<cmd>UndotreeToggle<cr>')
-all('<c-1>', require 'mini.files'.open)
+all('<c-s-f>', '<cmd>Pick grep<cr>')
 
 all('<a-k>', '<cmd>resize +2<cr>')
 all('<a-j>', '<cmd>resize -2<cr>')
@@ -306,7 +334,6 @@ all('<a-l>', '<cmd>vertical resize +2<cr>')
 all('<c-cr>', '<cmd>wincmd =<cr>')
 all('<c-space>', '<cmd>resize<cr><cmd>vertical resize<cr>')
 
-n('<leader>d', vim.diagnostic.open_float)
 n('<leader>f', vim.lsp.buf.format)
 n('<leader>z', 'zz')
 nx('<leader>s', ':s/\\V\\<<c-r>0/')
@@ -316,6 +343,8 @@ local ms = require 'mini.keymap'.map_multistep
 ms('i', '<tab>', { 'pmenu_next' })
 ms('i', '<s-tab>', { 'pmenu_prev' })
 
+all('<c-\\>', '<cmd>:e ~/.config/nvim/init.lua<cr>')
+
 local undo_path = vim.fn.stdpath('state') .. '/undo'
 if vim.fn.isdirectory(undo_path) == 0 then
   vim.fn.mkdir(undo_path, 'p', 448)
@@ -324,7 +353,7 @@ vim.opt.undodir = undo_path
 vim.opt.undofile = true
 
 if vim.g.neovide then
-  vim.opt.guifont = "Lilex Nerd Font:h14"
+  vim.opt.guifont = "RecMonoCasual Nerd Font:h14"
   local function update_scale(delta)
     vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + delta
     if vim.g.neovide_scale_factor <= 0.1 then
